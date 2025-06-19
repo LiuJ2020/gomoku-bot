@@ -1,7 +1,7 @@
 import numpy as np
 import pygame
-from players.player import Player
-from players.human_player import HumanPlayer
+from players import Player
+from players import HumanPlayer
 
 BOARD_SIZE = 19
 CELL_SIZE = 32
