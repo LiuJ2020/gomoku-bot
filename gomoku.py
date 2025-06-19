@@ -1,7 +1,8 @@
 import numpy as np
 import pygame
-from players import Player
-from players import HumanPlayer
+from players import *
+from evaluators import *
+from board import Board
 
 BOARD_SIZE = 19
 CELL_SIZE = 32
@@ -13,7 +14,7 @@ LINE_COLOR = (0, 0, 0)
 
 class GomokuGame:
     def __init__(self, players):
-        self.board = np.zeros((BOARD_SIZE, BOARD_SIZE), dtype=int)  # 0=empty, 1=black, 2=white
+        self.board = Board(BOARD_SIZE)
         self.players = players
         self.current_player_idx = 0  # 0=black, 1=white
         self.winner = None
@@ -23,36 +24,18 @@ class GomokuGame:
         self.current_player_idx = 1 - self.current_player_idx
 
     def is_valid_move(self, row, col):
-        return 0 <= row < BOARD_SIZE and 0 <= col < BOARD_SIZE and self.board[row, col] == 0
+        return self.board.is_valid_move(row, col)
 
     def make_move(self, row, col):
-        if not self.is_valid_move(row, col):
-            return False
         color = 1 if self.current_player_idx == 0 else 2
-        self.board[row, col] = color
-        if self.check_win(row, col, color):
+        if not self.board.make_move(row, col, color):
+            return False
+        if self.board.check_win(row, col, color):
             self.winner = color
             self.running = False
         else:
             self.switch_player()
         return True
-
-    def check_win(self, row, col, color):
-        directions = [(1,0), (0,1), (1,1), (1,-1)]
-        for dr, dc in directions:
-            count = 1
-            for d in [1, -1]:
-                r, c = row, col
-                while True:
-                    r += dr * d
-                    c += dc * d
-                    if 0 <= r < BOARD_SIZE and 0 <= c < BOARD_SIZE and self.board[r, c] == color:
-                        count += 1
-                    else:
-                        break
-            if count >= 5:
-                return True
-        return False
 
     def get_current_player(self):
         return self.players[self.current_player_idx]
@@ -76,7 +59,7 @@ class GomokuGame:
                     if self.is_valid_move(row, col):
                         self.get_current_player().set_move((row, col))
             player = self.get_current_player()
-            move = player.get_move(self.board)
+            move = player.get_move(self.board.board)
             if move:
                 self.make_move(*move)
             self.draw_board(screen, font)
@@ -100,9 +83,9 @@ class GomokuGame:
             pygame.draw.line(screen, LINE_COLOR, (MARGIN + i*CELL_SIZE, MARGIN), (MARGIN + i*CELL_SIZE, MARGIN + (BOARD_SIZE-1)*CELL_SIZE))
         for r in range(BOARD_SIZE):
             for c in range(BOARD_SIZE):
-                if self.board[r, c] == 1:
+                if self.board.board[r, c] == 1:
                     pygame.draw.circle(screen, BLACK, (MARGIN + c*CELL_SIZE, MARGIN + r*CELL_SIZE), CELL_SIZE//2 - 2)
-                elif self.board[r, c] == 2:
+                elif self.board.board[r, c] == 2:
                     pygame.draw.circle(screen, WHITE, (MARGIN + c*CELL_SIZE, MARGIN + r*CELL_SIZE), CELL_SIZE//2 - 2)
         turn_text = 'Black' if self.current_player_idx == 0 else 'White'
         text = font.render(f"Turn: {turn_text}", True, (0,0,0))
@@ -110,6 +93,6 @@ class GomokuGame:
 
 if __name__ == "__main__":
     black = HumanPlayer('black')
-    white = HumanPlayer('white')
+    white = MinimaxBotPlayer('white', BlankBoardEvaluator(), max_depth=5)
     game = GomokuGame([black, white])
     game.run()

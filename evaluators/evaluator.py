@@ -10,3 +10,15 @@ class BoardEvaluator:
             int: score (positive = advantage for 'turn', negative = disadvantage)
         """
         raise NotImplementedError
+    
+class BlankBoardEvaluator(BoardEvaluator):
+    def evaluate(self, board, turn):
+        """
+        A blank evaluator that always returns 0.
+        Args:
+            board (np.ndarray): 2D numpy array representing the board (0=empty, 1=black, 2=white)
+            turn (str): 'black' or 'white'
+        Returns:
+            int: always returns 0
+        """
+        return 0
