@@ -93,6 +93,6 @@ class GomokuGame:
 
 if __name__ == "__main__":
     black = HumanPlayer('black')
-    white = MinimaxBotPlayer('white', BlankBoardEvaluator(), max_depth=5)
+    white = MinimaxBotPlayer('white', HeuristicBoardEvaluator(), max_depth=4)
     game = GomokuGame([black, white])
     game.run()
