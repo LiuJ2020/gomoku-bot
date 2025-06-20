@@ -3,6 +3,9 @@ import pygame
 from players import *
 from evaluators import *
 from board import Board
+import pickle
+import argparse
+import os
 
 BOARD_SIZE = 19
 CELL_SIZE = 32
@@ -91,8 +94,18 @@ class GomokuGame:
         text = font.render(f"Turn: {turn_text}", True, (0,0,0))
         screen.blit(text, (MARGIN, 0))
 
+def main():
+    parser = argparse.ArgumentParser(description="Gomoku Game or Sample Game Viewer.")
+    parser.add_argument('--sample_games', type=str, default=None, help='Path to .pkl file containing sample games to view')
+    args = parser.parse_args()
+    if args.sample_games:
+        from view_sample_games import view_sample_games
+        view_sample_games(args.sample_games)
+    else:
+        black = HumanPlayer('black')
+        white = MinimaxBotPlayer('white', HeuristicBoardEvaluator(), max_depth=4)
+        game = GomokuGame([black, white])
+        game.run()
+
 if __name__ == "__main__":
-    black = HumanPlayer('black')
-    white = MinimaxBotPlayer('white', HeuristicBoardEvaluator(), max_depth=4)
-    game = GomokuGame([black, white])
-    game.run()
+    main()
