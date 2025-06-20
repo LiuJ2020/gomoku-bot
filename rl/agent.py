@@ -16,6 +16,7 @@ class RLAgent:
         self.batch_size = 64
         self.train_steps = 0
         self.loss_history = []
+        self.loss_log = []  # For visualization
 
     def select_action(self, board, valid_moves, epsilon=0.1):
         if random.random() < epsilon:
@@ -50,11 +51,13 @@ class RLAgent:
                 targets[i, idx] = r + self.gamma * next_q_values[i].max().item()
         loss = self.criterion(q_values, targets)
         self.loss_history.append(loss.item())
+        self.loss_log.append((self.train_steps, loss.item()))
         self.train_steps += 1
         if self.train_steps % 100 == 0:
             print(f"Train step {self.train_steps}, loss: {loss.item():.4f}")
         self.optimizer.zero_grad()
         loss.backward()
+        torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
         self.optimizer.step()
 
     def _board_to_tensor(self, board):
